@@ -8,7 +8,11 @@ import CustomInput from '@/modules/common/components/CustomInput.vue';
 import CustomTextArea from '@/modules/common/components/CustomTextArea.vue';
 
 const validationSchema = yup.object({
-  title: yup.string().required().min(3),
+  title: yup
+    .string()
+    .required('Este campo es super importante')
+    .min(3, 'Mínimo de 3 caracteres!!!'),
+
   slug: yup.string().required(),
   description: yup.string().required(),
   price: yup.number().required(),
@@ -36,9 +40,9 @@ export default defineComponent({
       retry: false, // <--- disable retry
     });
 
-    const { values, defineField, errors, handleSubmit, resetForm } = useForm({
+    const { values, defineField, errors, handleSubmit, resetForm, meta } = useForm({
       validationSchema: validationSchema,
-      initialValues: product.value,
+      //initialValues: product.value,
     });
 
     const [title, titleAttrs] = defineField('title');
@@ -90,6 +94,7 @@ export default defineComponent({
       // Propiedades
       values,
       errors,
+      meta,
       title,
       titleAttrs,
       slug,
@@ -110,6 +115,10 @@ export default defineComponent({
       // Accion
       onSubmit,
       toggleSize,
+      hasSize: (size: string) => {
+        const currentSizes = sizes.value.map((s) => s.value);
+        return currentSizes.includes(size);
+      },
     };
   },
 });

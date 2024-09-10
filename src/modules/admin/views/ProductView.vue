@@ -1,7 +1,9 @@
 import CustomInput from '@/modules/common/components/CustomInput.vue';
 <template>
   <div class="bg-white px-5 py-2 rounded">
-    <h1 class="text-3xl">Producto: <small class="text-blue-500">nombre</small></h1>
+    <h1 class="text-3xl">
+      Producto: <small class="text-blue-500">{{ title }}</small>
+    </h1>
     <hr class="my-4" />
   </div>
 
@@ -27,12 +29,12 @@ import CustomInput from '@/modules/common/components/CustomInput.vue';
       </div>
 
       <div class="flex flex-row gap-3">
-        <div class="mb-4">
+        <div class="mb-4 flex-1">
           <label for="price" class="form-label">Precio</label>
           <CustomInput v-model.number="price" v-bind="priceAttrs" :error="errors.price" />
         </div>
 
-        <div class="mb-4">
+        <div class="mb-4 flex-1">
           <label for="stock" class="form-label">Inventario</label>
           <CustomInput v-model.number="stock" v-bind="stockAttrs" :error="errors.stock" />
         </div>
@@ -44,9 +46,15 @@ import CustomInput from '@/modules/common/components/CustomInput.vue';
           <button
             v-for="size in allSizes"
             :key="size"
-            ype="button"
+            type="button"
             @click="toggleSize(size)"
-            class="bg-blue-100 p-2 rounded w-14 mr-2 flex-1"
+            :class="[
+              ' p-2 rounded w-14 mr-2 flex-1',
+              {
+                'bg-blue-100': !hasSize(size),
+                'bg-blue-500 text-white': hasSize(size),
+              },
+            ]"
           >
             {{ size }}
           </button>
@@ -98,6 +106,9 @@ import CustomInput from '@/modules/common/components/CustomInput.vue';
     </pre>
     <pre class="bg-red-300 p-2">
       {{ JSON.stringify(errors, null, 2) }}
+    </pre>
+    <pre class="bg-green-300 p-2 col-span-2">
+      {{ JSON.stringify(meta, null, 2) }}
     </pre>
   </div>
 </template>
