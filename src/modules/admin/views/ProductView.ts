@@ -1,11 +1,12 @@
-import { getProductById } from '@/modules/products/actions';
-import { useQuery } from '@tanstack/vue-query';
+import { createUpdateProductAction, getProductById } from '@/modules/products/actions';
+import { useMutation, useQuery } from '@tanstack/vue-query';
 import { defineComponent, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFieldArray, useForm } from 'vee-validate';
 import * as yup from 'yup';
 import CustomInput from '@/modules/common/components/CustomInput.vue';
 import CustomTextArea from '@/modules/common/components/CustomTextArea.vue';
+import { useToast } from 'vue-toastification';
 
 const validationSchema = yup.object({
   title: yup
@@ -30,10 +31,12 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
+    const toast = useToast();
     const {
       data: product,
       isError,
       isLoading,
+      refetch,
     } = useQuery({
       queryKey: ['product', props.productId],
       queryFn: () => getProductById(props.productId),
@@ -55,8 +58,17 @@ export default defineComponent({
     const { fields: images } = useFieldArray<string>('images');
     const { fields: sizes, remove: removeSize, push: pushSize } = useFieldArray<string>('sizes');
 
-    const onSubmit = handleSubmit((value) => {
-      console.log(value);
+    const {
+      mutate,
+      isPending,
+      isSuccess: isUpdateSuccess,
+      data: updatedProduct,
+    } = useMutation({
+      mutationFn: createUpdateProductAction, // <--- mutation function
+    });
+
+    const onSubmit = handleSubmit((values) => {
+      mutate(values!);
     });
 
     const toggleSize = (size: string) => {
@@ -90,6 +102,24 @@ export default defineComponent({
       },
     );
 
+    watch(isUpdateSuccess, (value) => {
+      if (!value) return;
+      toast.success('Product updated successfully');
+      // TODO: redireccion cuando se crea
+      router.replace(`/admin/products/${updatedProduct.value!.id}`);
+      // Restablecer los valores del formulario
+      resetForm({
+        values: updatedProduct.value,
+      });
+    });
+
+    watch(
+      () => props.productId,
+      () => {
+        refetch();
+      },
+    );
+
     return {
       // Propiedades
       values,
@@ -109,6 +139,7 @@ export default defineComponent({
       genderAttrs,
       images,
       sizes,
+      isPending,
       // Getters
       allSizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
 
