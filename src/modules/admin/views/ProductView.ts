@@ -1,6 +1,6 @@
 import { createUpdateProductAction, getProductById } from '@/modules/products/actions';
 import { useMutation, useQuery } from '@tanstack/vue-query';
-import { defineComponent, watch, watchEffect } from 'vue';
+import { defineComponent, ref, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFieldArray, useForm } from 'vee-validate';
 import * as yup from 'yup';
@@ -54,6 +54,7 @@ export default defineComponent({
     const [price, priceAttrs] = defineField('price');
     const [stock, stockAttrs] = defineField('stock');
     const [gender, genderAttrs] = defineField('gender');
+    const imageFiles = ref<File[]>([]);
 
     const { fields: images } = useFieldArray<string>('images');
     const { fields: sizes, remove: removeSize, push: pushSize } = useFieldArray<string>('sizes');
@@ -68,7 +69,11 @@ export default defineComponent({
     });
 
     const onSubmit = handleSubmit((values) => {
-      mutate(values!);
+      const formValues = {
+        ...values,
+        images: [...values.images, ...imageFiles.value],
+      };
+      mutate(formValues!);
     });
 
     const toggleSize = (size: string) => {
@@ -78,6 +83,16 @@ export default defineComponent({
         removeSize(currentSizes.indexOf(size));
       } else {
         pushSize(size);
+      }
+    };
+
+    const onFilesChanged = (event: Event) => {
+      const fileInput = event.target as HTMLInputElement;
+      const filesList = fileInput.files;
+      if (!filesList) return;
+      if (filesList.length === 0) return;
+      for (const imageFile of filesList) {
+        imageFiles.value.push(imageFile);
       }
     };
 
@@ -95,6 +110,7 @@ export default defineComponent({
         resetForm({
           values: product.value,
         });
+        imageFiles.value = []; // reset image files
       },
       {
         deep: true,
@@ -140,6 +156,7 @@ export default defineComponent({
       images,
       sizes,
       isPending,
+      imageFiles,
       // Getters
       allSizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
 
@@ -149,6 +166,10 @@ export default defineComponent({
       hasSize: (size: string) => {
         const currentSizes = sizes.value.map((s) => s.value);
         return currentSizes.includes(size);
+      },
+      onFilesChanged,
+      temporalImageUrl: (imageFile: File) => {
+        return URL.createObjectURL(imageFile);
       },
     };
   },

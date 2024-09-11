@@ -70,12 +70,27 @@ import CustomInput from '@/modules/common/components/CustomInput.vue';
         <div class="flex-shrink-0" v-for="image in images" :key="image.value">
           <img :src="image.value" :alt="title" class="w-[250px] h-[250px] rounded" />
         </div>
+
+        <div class="flex-shrink-0" v-for="imageFile in imageFiles" :key="imageFile.name">
+          <img
+            :src="temporalImageUrl(imageFile)"
+            :alt="title"
+            class="w-[250px] h-[250px] rounded"
+          />
+        </div>
       </div>
       <!-- Upload image -->
       <div class="col-span-2 my-2">
         <label for="image" class="form-label">Subir imagen</label>
 
-        <input multiple type="file" id="image" class="form-control" />
+        <input
+          multiple
+          type="file"
+          id="image"
+          class="form-control"
+          accept="image/*"
+          @change="onFilesChanged"
+        />
       </div>
 
       <div class="mb-4">

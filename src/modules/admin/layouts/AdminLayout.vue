@@ -115,7 +115,7 @@
         </svg>
       </a>
       <a
-        class="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-4 mt-auto rounded hover:bg-gray-300"
+        class="flex items-center justify-center flex-shrink-0 w-10 h-10 mt-4 rounded hover:bg-gray-300"
         href="#"
       >
         <svg
